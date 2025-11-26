@@ -251,7 +251,7 @@ const App: React.FC = () => {
           <img src={getImg('home.png')} className="w-full h-full object-contain" alt="Home" />
           {!isGameLive ? (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20">
-              <div className="text-white text-[5vmin] tracking-widest mb-4"></div>
+              <div className="text-white text-[5vmin] tracking-widest mb-4">即將開始</div>
               <div className="text-lumina-primary text-[6vmin] font-mono animate-pulse">{timeLeft}</div>
             </div>
           ) : (
