@@ -1,7 +1,7 @@
 // 1. 測試模式開關 (TEST MODE)
 // 設定為 true: 跳過倒數，直接開始遊戲 (方便測試)
 // 設定為 false: 正式上線，啟用倒數計時
-export const TEST_MODE = true;
+export const TEST_MODE = false;
 
 // 2. 遊戲設定
 export const TARGET_DATE = "2025-11-30T20:00:00"; // 遊戲開始時間
