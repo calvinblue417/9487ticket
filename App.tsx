@@ -115,9 +115,14 @@ const App: React.FC = () => {
   // 錯誤震動狀態
   const [shakeError, setShakeError] = useState(false);
 
-  // 倒數計時
+  // 倒數計時狀態初始化邏輯修正：
+  // 直接在初始渲染時判斷時間，確保遲到的玩家不會看到倒數遮罩閃爍
+  const [isGameLive, setIsGameLive] = useState(() => {
+    if (TEST_MODE) return true;
+    return new Date(TARGET_DATE).getTime() <= Date.now();
+  });
+  
   const [timeLeft, setTimeLeft] = useState<string>('');
-  const [isGameLive, setIsGameLive] = useState(false);
 
   // 預載圖片
   useEffect(() => {
@@ -132,7 +137,9 @@ const App: React.FC = () => {
 
   // 倒數邏輯
   useEffect(() => {
-    if (TEST_MODE) { setIsGameLive(true); return; }
+    // 如果已經開始了，就不需要跑計時器
+    if (isGameLive) return;
+
     const interval = setInterval(() => {
       const diff = new Date(TARGET_DATE).getTime() - Date.now();
       if (diff < 0) {
@@ -148,7 +155,7 @@ const App: React.FC = () => {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isGameLive]);
 
   // --- 互動函式 ---
 
@@ -317,12 +324,15 @@ const App: React.FC = () => {
       {step === AppStep.HOME && (
         <div className="absolute inset-0 w-full h-full z-10">
           <img src={getImg('home.png')} className="w-full h-full object-contain" alt="Home" />
-          {!isGameLive ? (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20">
-              <div className="text-white text-[5vmin] tracking-widest mb-4">即將開始</div>
-              <div className="text-white text-[6vmin] font-mono animate-pulse">{timeLeft}</div>
-            </div>
-          ) : (
+          
+          {/* 倒數遮罩：使用 transition-opacity 進行淡出，isGameLive 為 true 時隱藏並設為 pointer-events-none */}
+          <div className={`absolute inset-0 flex flex-col items-center justify-center bg-black/70 z-20 transition-opacity duration-1000 ${isGameLive ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}>
+            <div className="text-white text-[5vmin] tracking-widest mb-4">即將開始</div>
+            <div className="text-white text-[6vmin] font-mono animate-pulse">{timeLeft}</div>
+          </div>
+
+          {/* 開始按鈕：時間到時顯示 (位於遮罩下方，遮罩消失後可點擊) */}
+          {isGameLive && (
             <button onClick={() => setStep(AppStep.START)} className="absolute inset-0 z-10 w-full h-full cursor-pointer" />
           )}
         </div>
