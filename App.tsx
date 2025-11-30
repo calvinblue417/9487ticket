@@ -115,6 +115,10 @@ const App: React.FC = () => {
   // 錯誤震動狀態
   const [shakeError, setShakeError] = useState(false);
 
+  // 音樂播放狀態 (預設 false: 靜音/暫停)
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
+
   // 倒數計時狀態初始化邏輯修正：
   // 直接在初始渲染時判斷時間，確保遲到的玩家不會看到倒數遮罩閃爍
   const [isGameLive, setIsGameLive] = useState(() => {
@@ -158,6 +162,21 @@ const App: React.FC = () => {
   }, [isGameLive]);
 
   // --- 互動函式 ---
+
+  const toggleMusic = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (isMusicPlaying) {
+      audio.pause();
+      setIsMusicPlaying(false);
+    } else {
+      audio.play().catch(e => {
+        console.error("播放失敗 (可能是瀏覽器限制):", e);
+      });
+      setIsMusicPlaying(true);
+    }
+  };
 
   const handleError = () => {
     setShakeError(true);
@@ -317,6 +336,19 @@ const App: React.FC = () => {
 
   return (
     <SquarePage>
+      {/* 背景音樂播放器 */}
+      <audio ref={audioRef} src={getImg('bgm.mp3')} loop />
+
+      {/* 音樂控制按鈕 (右上角) - 已修改為純文字符號 */}
+      <button 
+        onClick={toggleMusic}
+        className="absolute top-[1%] right-[1%] z-[200] w-[10vmin] h-[10vmin] flex items-center justify-center text-white font-bold opacity-80 hover:opacity-100 transition-opacity"
+        style={{ fontSize: '5vmin' }}
+        title={isMusicPlaying ? "靜音" : "播放音樂"}
+      >
+        {isMusicPlaying ? '🔊' : '🔇'}
+      </button>
+
       {/* 全域背景色 (避免圖片透明部分透出底色) */}
       <div className="absolute inset-0 bg-black" />
 
@@ -553,7 +585,7 @@ const App: React.FC = () => {
             <>
             <img src={getImg('end.png')} className="w-full h-full object-contain" alt="End" />
             
-            {/* 調整 END 頁玩家名字的寬度：請修改下方 style 中的 width: '40%' */}
+            {/* 調整 END 頁玩家名字的寬度：5% (遵照使用者指示) */}
             <AutoFitText 
               text={user.name}
               className="absolute text-[#774d00] font-bold text-[5vmin] drop-shadow-md"
